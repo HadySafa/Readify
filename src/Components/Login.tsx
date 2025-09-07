@@ -4,10 +4,13 @@ import type { Notification } from "../Models/Notification"
 import NotificationToast from "./NotificationToast"
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setTokenExpiration } from "../Store/Slices/AuthenticationSlice";
 
 export default function Login() {
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [showPassword, setShowPassword] = useState(false)
   const [notification, setNotification] = useState<Notification | null>(null)
@@ -41,15 +44,15 @@ export default function Login() {
       const response = await axios.post(url, formData);
       addNotification("Logged in successfully.", "success");
       setIsLoading(false);
-      // setTimeout(() => navigate('/'), 2000); -> navigate if needed
-      // set the token expiration date when global context is available
+      dispatch(setTokenExpiration(response.data.tokenExpiration))
+      setTimeout(() => navigate('/homepage'), 2000);
     } catch (error: unknown) {
       setIsLoading(false);
       if (axios.isAxiosError(error)) {
         if (error.response) {
           addNotification(error.response.data?.message, "error")
         } else if (error.request) {
-          addNotification("Unable to reach the server. Please check your internet connection and try again.", "error")
+          addNotification("Unable to reach the server. Please try again.", "error")
         }
       }
       else { addNotification("Unexpected error occurred.", "error"); }
