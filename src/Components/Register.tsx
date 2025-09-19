@@ -1,23 +1,35 @@
+// React
 import React, { useState } from "react";
-import { BookOpen } from "lucide-react";
-import type { Notification } from "../Models/Notification";
-import NotificationToast from "./NotificationToast";
-import axios from "axios";
+
+// Router
 import { useNavigate } from "react-router-dom";
+
+// Icons
+import { BookOpen } from "lucide-react";
+
+// Types
+import type { Notification } from "../Models/Notification";
+
+// Components
+import NotificationToast from "./NotificationToast";
+
+// Libraries
+import axios from "axios";
+
 
 export default function Register() {
 
     const navigate = useNavigate();
 
+    const [showPassword, setShowPassword] = useState(false);
+    const [notification, setNotification] = useState<Notification | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
         full_name: "",
         username: "",
         password: "",
         phone_number: "",
     });
-    const [showPassword, setShowPassword] = useState(false);
-    const [notification, setNotification] = useState<Notification | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
 
     const addNotification = (message: string, type: "success" | "error") => {
         setNotification({ message, type });
@@ -52,8 +64,6 @@ export default function Register() {
         }
         return true;
     };
-
-
     async function handleRegister(e: React.FormEvent): Promise<void> {
         
         e.preventDefault();
@@ -64,7 +74,7 @@ export default function Register() {
         const url = "http://localhost:5067/api/register";
         
         try {
-            const response = await axios.post(url, formData);
+            await axios.post(url, formData);
             addNotification("Registered successfully.", "success");
             setIsLoading(false);
             setTimeout(() => navigate('/'), 2000);

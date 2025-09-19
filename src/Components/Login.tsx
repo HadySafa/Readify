@@ -1,13 +1,31 @@
-import React, { useState } from "react"
-import { BookOpen, Eye, EyeOff } from "lucide-react"
-import type { Notification } from "../Models/Notification"
-import NotificationToast from "./NotificationToast"
-import axios from "axios";
+// React
+import { useEffect, useState } from "react";
+
+// Router
 import { useNavigate } from "react-router-dom";
+
+// Icons
+import { BookOpen, Eye, EyeOff } from "lucide-react";
+
+// Types
+import type { Notification } from "../Models/Notification";
+
+// Components
+import NotificationToast from "./NotificationToast";
+
+// Libraries
+import axios from "axios";
+
+// Redux
 import { useDispatch } from "react-redux";
-import { setTokenExpiration } from "../Store/Slices/AuthenticationSlice";
+import { setToken } from "../Store/Slices/AuthenticationSlice";
+import { useSelector } from "react-redux";
+import type { RootState } from "../Store";
+
 
 export default function Login() {
+
+  const role = useSelector((state: RootState) => state.auth.role)
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -44,8 +62,7 @@ export default function Login() {
       const response = await axios.post(url, formData);
       addNotification("Logged in successfully.", "success");
       setIsLoading(false);
-      dispatch(setTokenExpiration(response.data.tokenExpiration))
-      setTimeout(() => navigate('/homepage'), 2000);
+      dispatch(setToken(response.data.token))
     } catch (error: unknown) {
       setIsLoading(false);
       if (axios.isAxiosError(error)) {
@@ -59,6 +76,20 @@ export default function Login() {
     }
 
   }
+
+  // Redirect based on the role
+  useEffect(() => {
+    setTimeout(() => {
+      if (role) {
+        if (role === 'user') {
+          navigate('/homepage')
+        }
+        else {
+          navigate('/dashboard')
+        }
+      }
+    }, 1500);
+  }, [role])
 
   return (
 
