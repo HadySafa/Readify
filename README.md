@@ -60,3 +60,10 @@ The development of this project was carried out in **7 key phases**:
 5. **Feature Development** – built admin functionalities first, followed by user features.  
 6. **Testing** – validated APIs and UI with **Postman**, **Swagger**, and **browser developer tools**.  
 7. **Documentation** – prepared detailed project documentation.
+
+I’ve shared a detailed breakdown of these phases in a series of LinkedIn posts.  
+You can start reading from **[Phase 1 here](https://www.linkedin.com/posts/hadyabdallahsafa_fullstackdevelopment-webdevelopment-reactjs-activity-7371797383292284928-HTZk?utm_source=share&utm_medium=member_desktop&rcm=ACoAADy9VLYB3eC6Id_JgPlGzjgt4k6V8fuMstY)**.  
+
+
+---
+
