@@ -3,13 +3,12 @@ Readify
 **Readify** is a fully functional, responsive, and user-friendly e-library web application.  
 It is built with **React & TypeScript** on the frontend and **ASP.NET Core** on the backend, connected through REST APIs.
 
----
 
 ## Project Features
 
 ### Core Features
 
-#### 👨Admin
+#### Admin
 
 - Manage books: add, update, delete, and view.  
 - Manage authors: add, update, delete, and view.  
