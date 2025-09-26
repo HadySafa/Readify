@@ -9,6 +9,7 @@ import { BookOpen, Plus, List } from "lucide-react";
 import { fetchBooks } from "../../../Store/Slices/BookSlice";
 import type { RootState, AppDispatch } from "../../../Store";
 import { useSelector, useDispatch } from "react-redux";
+import { clearBookState } from "../../../Store/Slices/BookSlice";
 
 // Components
 import BookComponent from "./Book";
@@ -227,6 +228,14 @@ export function BooksContainer({ searchTerm }: propsType) {
       }
     }
   }
+
+  // Show error notifications when fetching books fails
+    useEffect(() => {
+      if (!loading && error) {
+        addNotification(error, "error");
+        dispatch(clearBookState());
+      }
+    }, [error, loading]);
 
   return (
     <div>

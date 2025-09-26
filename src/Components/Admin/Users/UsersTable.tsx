@@ -20,7 +20,6 @@ import axios from "axios";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../Store";
 
-
 interface UsersTableProps {
   searchTerm: string;
 }
@@ -181,12 +180,11 @@ export default function UsersTable({ searchTerm }: UsersTableProps) {
 
                   {/* Actions */}
                   <div className="mt-2 md:mt-0 md:text-right">
-                    <a href={`/admin/users/${user.id}/history`}>
-                      <button className="flex items-center gap-1 px-3 py-1 text-white bg-green-700 border border-gray-300 rounded bgtext-sm hover:bg-green-900">
+                      <button  onClick={ () => { navigate("/history/" + user.id) } }
+                      className="flex items-center gap-1 px-3 py-1 text-white bg-green-700 border border-gray-300 rounded bgtext-sm hover:bg-green-900">
                         <Eye className="w-3 h-3" />
                         View History
                       </button>
-                    </a>
                   </div>
 
                 </div>

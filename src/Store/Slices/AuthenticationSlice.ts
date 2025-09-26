@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 interface AuthState {
   token: string;
@@ -9,24 +9,31 @@ interface AuthState {
 }
 
 interface DecodedToken {
-  [key: string]: any; 
+  [key: string]: any;
 }
 
-function getInitialRoleAndName(): { role: string | null; name: string | null }{
+function getInitialRoleAndName(): { role: string | null; name: string | null } {
 
   const token = sessionStorage.getItem("token");
   if (!token) return { role: null, name: null };
 
   try {
     const decoded: DecodedToken = jwtDecode(token);
+
+    if (decoded.exp && decoded.exp * 1000 < Date.now()) {
+      sessionStorage.removeItem("token");
+      return { role: null, name: null };
+    }
+
     return {
       role: decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || null,
       name: decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"] || null
     };
+    
   } catch {
     return { role: null, name: null };
   }
-  
+
 };
 
 const initialState: AuthState = {

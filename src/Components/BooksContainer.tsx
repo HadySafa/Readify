@@ -1,62 +1,87 @@
 import { useEffect, useState } from "react"
-import { BookOpen, Search, Loader2, Edit, Trash2, Plus, Settings } from "lucide-react"
+import axios from "axios"
 
+// Icons
+import { BookOpen } from "lucide-react"
+
+// Components
 import Book from "./Book"
-import type { BookResponse } from "../Models/BookResponse"
-import type { Notification } from "../Models/Notification"
 import NotificationToast from "./NotificationToast"
 import { HeaderNavigation } from "./Header"
 
+// Types
+import type { BookResponse } from "../Models/BookResponse"
+import type { Notification } from "../Models/Notification"
+import type { Author } from "../Models/Author"
+import type { Genre } from "../Models/Genre"
 
 // Redux
-import { useSelector } from "react-redux";
-import type { RootState } from "../../Store";
+import { useSelector, useDispatch } from "react-redux";
+import type { RootState, AppDispatch } from "../Store"
+import { fetchGenres } from "../Store/Slices/GenreSlice"
+import { fetchAuthors } from "../Store/Slices/AuthorSlice"
 
 // Router
 import { useNavigate } from "react-router-dom";
 
-import axios from "axios"
-
-
-const genres = ["All Genres", "Fiction", "Romance", "Dystopian", "Non-Fiction", "Mystery", "Sci-Fi"]
-const authors = [
-    "All Authors",
-    "F. Scott Fitzgerald",
-    "Harper Lee",
-    "Jane Austen",
-    "George Orwell",
-    "J.D. Salinger",
-    "William Golding",
-]
-
 export default function BooksContainer() {
+
+    // Get role + protect the page
+    const role = useSelector((state: RootState) => state.auth.role)
+    useEffect(() => {
+        if (!role) { navigate("/") }
+    }, [])
 
     const navigate = useNavigate()
 
     const token = useSelector((state: RootState) => state.auth.token)
 
-    const role = useSelector((state: RootState) => state.auth.role)
-
-    function addNotification(message: string, type: "success" | "error"): void {
-        setNotification({ message, type })
-        setTimeout(() => {
-            setNotification(null)
-        }, 3000)
-    }
-
+    const dispatch = useDispatch<AppDispatch>();
 
     const [notification, setNotification] = useState<Notification | null>(null)
-
-    const [loading, setLoading] = useState<boolean>(false)
-
     const [books, setBooks] = useState<BookResponse[]>([])
+    const [loading, setLoading] = useState<boolean>(false) // Books loading state
+    const [openDropdown, setOpenDropdown] = useState<"genre" | "availability" | "author" | null>(null); // Drop Down
+    const [searchTerm, setSearchTerm] = useState("")
+    const [selectedGenre, setSelectedGenre] = useState<number>(-1)
+    const [selectedGenreName, setSelectedGenreName] = useState<string>("All Genres")
+    const [selectedAuthor, setSelectedAuthor] = useState<number>(-1)
+    const [selectedAuthorName, setSelectedAuthorName] = useState<string>("All Authors")
+    const [availabilityFilter, setAvailabilityFilter] = useState("All")
 
+    // Fetch genres and authors
+    const genres = useSelector((state: RootState) => state.genre.genres) as Genre[];
+    const authors = useSelector((state: RootState) => state.author.authors) as Author[];
+    useEffect(() => {
+        dispatch(fetchAuthors())
+        dispatch(fetchGenres())
+    }, [])
 
-    async function fetchBooks() {
+    // Get filtered books 
+    async function fetchFilteredBooks() {
 
         setLoading(true)
 
-        const url = "http://localhost:5067/api/users-books";
+        let url = "http://localhost:5067/api/books/filter?";
+        const params: string[] = [];
+
+        if (searchTerm.trim()) {
+            params.push("Search=" + encodeURIComponent(searchTerm));
+        }
+
+        if (selectedGenre !== -1) {
+            params.push("GenreId=" + selectedGenre);
+        }
+
+        if (selectedAuthor !== -1) {
+            params.push("AuthorId=" + selectedAuthor);
+        }
+
+        if (availabilityFilter !== "All") {
+            params.push("Availability=" + availabilityFilter);
+        }
+
+        url += params.join("&");
 
         try {
             const response = await axios.get(url, {
@@ -64,6 +89,7 @@ export default function BooksContainer() {
                     Authorization: `Bearer ${token}`
                 }
             });
+            console.log(url)
             setLoading(false)
             setBooks(response.data.books)
         }
@@ -90,237 +116,187 @@ export default function BooksContainer() {
         }
 
     }
+    useEffect(() => { fetchFilteredBooks() }, [searchTerm, selectedGenre, selectedAuthor, availabilityFilter])
 
-    useEffect(() => { fetchBooks() }, [])
-
-
-    const [openGenre, setOpenGenre] = useState(false);
-    const [openAuthor, setOpenAuthor] = useState(false);
-    const [openAvailability, setOpenAvailability] = useState(false);
-
-
-
-    const [searchTerm, setSearchTerm] = useState("")
-    const [selectedGenre, setSelectedGenre] = useState("All Genres")
-    const [selectedAuthor, setSelectedAuthor] = useState("All Authors")
-    const [availabilityFilter, setAvailabilityFilter] = useState("All")
-    const [isLoading, setIsLoading] = useState(false)
-
-    const filteredBooks = books.filter((book) => {
-        const matchesSearch =
-            book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            book.author.toLowerCase().includes(searchTerm.toLowerCase())
-        const matchesGenre = selectedGenre === "All Genres" || book.genre === selectedGenre
-        const matchesAuthor = selectedAuthor === "All Authors" || book.author === selectedAuthor
-        const matchesAvailability =
-            availabilityFilter === "All" ||
-            (availabilityFilter === "Available" && book.available) ||
-            (availabilityFilter === "Not Available" && !book.available)
-        return matchesSearch && matchesGenre && matchesAuthor && matchesAvailability
-    })
-
-    const handleAddBook = () => console.log("Add book clicked")
-    const handleManageGenres = () => console.log("Manage genres clicked")
-    const handleEditBook = (bookId: number) => console.log("Edit book:", bookId)
-    const handleDeleteBook = (bookId: number) => console.log("Delete book:", bookId)
-
-
-
-    // Track which dropdown is open: "genre", "availability", "author", or null
-    const [openDropdown, setOpenDropdown] = useState<"genre" | "availability" | "author" | null>(null);
-
-
-    if (isLoading) {
-        return (
-            <div className="container p-6 mx-auto">
-                <div className="flex items-center justify-center min-h-[400px]">
-                    <div className="flex flex-col items-center gap-4">
-                        <Loader2 className="w-8 h-8 text-green-600 animate-spin" />
-                        <p className="text-gray-500">Loading books...</p>
-                    </div>
-                </div>
-            </div>
-        )
+    function addNotification(message: string, type: "success" | "error"): void {
+        setNotification({ message, type })
+        setTimeout(() => {
+            setNotification(null)
+        }, 3000)
     }
 
     return (
         <>
-            <HeaderNavigation role={role}  />
-            
-            <div className="container mx-auto">
+            <HeaderNavigation role={role} active="Home" />
 
-                {notification && (
-                    <NotificationToast notification={notification} onClose={() => setNotification(null)} />
-                )}
+            {notification && (
+                <NotificationToast notification={notification} onClose={() => setNotification(null)} />
+            )}
 
-                {/* Header */}
-                <div className="flex flex-col gap-6 p-6">
+            <div className="container p-6 mx-auto">
 
-                    {/* Header + Search */}
-                    <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                        <h1 className="text-3xl font-bold text-gray-900">Books</h1>
+                {/* Filters + Search Section */}
+                <div className="flex flex-col gap-3 p-3 pb-4 mb-6 border border-gray-200 shadow-md bg-gray-50 lg:flex-row backdrop-blur-md rounded-2xl">
 
-                        <div className="relative w-full lg:max-w-xl">
-                            <Search className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-4 top-1/2" />
-                            <input
-                                type="text"
-                                placeholder="Search books by title or author..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full py-3 pl-12 pr-4 transition-colors border-2 border-gray-300 shadow-sm rounded-xl focus:outline-none focus:border-green-500"
-                            />
-                        </div>
-                    </div>
-
-                    {/* Filters */}
-                    <div className="flex flex-col gap-4 p-5 border border-gray-200 shadow-md lg:p-6 bg-white/70 backdrop-blur-md rounded-2xl lg:flex-row lg:gap-6">
+                    {/* Genre + Author */}
+                    <div className="flex flex-col gap-3 lg:flex-1">
 
                         {/* Genre */}
                         <div className="relative flex-1">
+
                             <label className="mb-2 text-sm font-semibold tracking-wide text-gray-800 uppercase">Genre</label>
+
                             <div className="relative">
+
                                 <button
                                     onClick={() => setOpenDropdown(openDropdown === "genre" ? null : "genre")}
                                     className="flex items-center justify-between w-full h-12 px-4 bg-white border-2 border-gray-300 shadow-sm rounded-xl focus:border-green-600 focus:ring-1 focus:ring-green-400 hover:border-green-400"
                                 >
-                                    {selectedGenre || "All Genres"}
+                                    {selectedGenreName}
                                     <span className={`ml-2 transition-transform ${openDropdown === "genre" ? "rotate-180" : ""}`}>▼</span>
                                 </button>
+
                                 {openDropdown === "genre" && (
-                                    <ul className="absolute z-10 w-full mt-1 overflow-y-auto bg-white border-2 border-gray-300 shadow-lg rounded-xl max-h-60">
+                                    <ul className="absolute z-40 w-full mt-1 overflow-y-auto bg-white border-2 border-gray-300 shadow-lg rounded-xl max-h-60">
                                         <li
                                             className="p-2 cursor-pointer hover:bg-green-100"
-                                            onClick={() => { setSelectedGenre(""); setOpenDropdown(null); }}
+                                            onClick={() => { setSelectedGenre(-1); setSelectedGenreName("All Genres"); setOpenDropdown(null); }}
                                         >
                                             All Genres
                                         </li>
                                         {genres.map((genre) => (
                                             <li
-                                                key={genre}
+                                                key={genre.id}
                                                 className="p-2 cursor-pointer hover:bg-green-100"
-                                                onClick={() => { setSelectedGenre(genre); setOpenDropdown(null); }}
+                                                onClick={() => { setSelectedGenre(genre.id); setSelectedGenreName(genre.name); setOpenDropdown(null); }}
                                             >
-                                                {genre}
+                                                {genre.name}
                                             </li>
                                         ))}
                                     </ul>
                                 )}
-                            </div>
-                        </div>
 
-                        {/* Availability */}
-                        <div className="relative flex-1">
-                            <label className="mb-2 text-sm font-semibold tracking-wide text-gray-800 uppercase">Availability</label>
-                            <div className="relative">
-                                <button
-                                    onClick={() => setOpenDropdown(openDropdown === "availability" ? null : "availability")}
-                                    className="flex items-center justify-between w-full h-12 px-4 bg-white border-2 border-gray-300 shadow-sm rounded-xl focus:border-green-600 focus:ring-1 focus:ring-green-400 hover:border-green-400"
-                                >
-                                    {availabilityFilter}
-                                    <span className={`ml-2 transition-transform ${openDropdown === "availability" ? "rotate-180" : ""}`}>▼</span>
-                                </button>
-                                {openDropdown === "availability" && (
-                                    <ul className="absolute z-10 w-full mt-1 bg-white border-2 border-gray-300 shadow-lg rounded-xl">
-                                        {["All", "Available", "Not Available"].map((option) => (
-                                            <li
-                                                key={option}
-                                                className="p-2 cursor-pointer hover:bg-green-100"
-                                                onClick={() => { setAvailabilityFilter(option); setOpenDropdown(null); }}
-                                            >
-                                                {option}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                )}
                             </div>
+
                         </div>
 
                         {/* Author */}
                         <div className="relative flex-1">
+
                             <label className="mb-2 text-sm font-semibold tracking-wide text-gray-800 uppercase">Author</label>
+
                             <div className="relative">
+
                                 <button
                                     onClick={() => setOpenDropdown(openDropdown === "author" ? null : "author")}
                                     className="flex items-center justify-between w-full h-12 px-4 bg-white border-2 border-gray-300 shadow-sm rounded-xl focus:border-green-600 focus:ring-1 focus:ring-green-400 hover:border-green-400"
                                 >
-                                    {selectedAuthor || "All Authors"}
+                                    {selectedAuthorName}
                                     <span className={`ml-2 transition-transform ${openDropdown === "author" ? "rotate-180" : ""}`}>▼</span>
                                 </button>
+
                                 {openDropdown === "author" && (
-                                    <ul className="absolute z-10 w-full mt-1 overflow-y-auto bg-white border-2 border-gray-300 shadow-lg rounded-xl max-h-60">
+                                    <ul className="absolute w-full mt-1 overflow-y-auto bg-white border-2 border-gray-300 shadow-lg rounded-xl max-h-60">
                                         <li
                                             className="p-2 cursor-pointer hover:bg-green-100"
-                                            onClick={() => { setSelectedAuthor(""); setOpenDropdown(null); }}
+                                            onClick={() => { setSelectedAuthor(-1); setSelectedAuthorName("All Authors"); setOpenDropdown(null); }}
                                         >
                                             All Authors
                                         </li>
                                         {authors.map((author) => (
                                             <li
-                                                key={author}
+                                                key={author.id}
                                                 className="p-2 cursor-pointer hover:bg-green-100"
-                                                onClick={() => { setSelectedAuthor(author); setOpenDropdown(null); }}
+                                                onClick={() => { setSelectedAuthor(author.id); setSelectedAuthorName(author.name); setOpenDropdown(null); }}
                                             >
-                                                {author}
+                                                {author.name}
                                             </li>
                                         ))}
                                     </ul>
                                 )}
                             </div>
+
                         </div>
 
-                        {/* Clear Filters Button */}
-                        <div className="flex items-end">
-                            <button
-                                onClick={() => {
-                                    setSelectedGenre("");
-                                    setAvailabilityFilter("All");
-                                    setSelectedAuthor("");
-                                }}
-                                className="px-5 py-3 text-white transition-colors bg-green-900 shadow-md rounded-xl hover:bg-green-700"
-                            >
-                                Clear Filters ✕
-                            </button>
+                    </div>
+
+                    {/* Search + Availability */}
+                    <div className="flex flex-col gap-3 lg:flex-1">
+
+                        {/* Search */}
+                        <div className="relative flex-1">
+                            <label className="mb-2 text-sm font-semibold tracking-wide text-gray-800 uppercase">
+                                Search
+                            </label>
+                            <input
+                                type="text"
+                                placeholder="Search books by title or author..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full h-12 pl-4 pr-4 transition-colors border-2 border-gray-300 shadow-sm rounded-xl focus:outline-none focus:border-green-500"
+                            />
+                        </div>
+
+                        {/* Availability */}
+                        <div className="flex flex-col">
+                            <label className="mb-2 text-sm font-semibold tracking-wide text-gray-800 uppercase">
+                                Availability
+                            </label>
+                            <div className="flex flex-wrap gap-4">
+                                {["All", "Available", "Not Available"].map((option) => (
+                                    <label
+                                        key={option}
+                                        className={`flex items-center gap-2 px-3 py-2 border rounded-xl cursor-pointer transition ${availabilityFilter === option
+                                            ? "bg-green-600 text-white border-green-600"
+                                            : "border-gray-300 hover:border-green-400"
+                                            }`}
+                                    >
+                                        <input
+                                            type="radio"
+                                            name="availability"
+                                            value={option}
+                                            checked={availabilityFilter === option}
+                                            onChange={() => setAvailabilityFilter(option)}
+                                            className="hidden"
+                                        />
+                                        <span className="text-sm font-medium">{option}</span>
+                                    </label>
+                                ))}
+                            </div>
                         </div>
 
                     </div>
 
                 </div>
 
+                {/* Content Section */}
+                <div className="w-full ">
 
-
-
-                <div className="w-full p-6 bg-gray-50 ">
-                    {filteredBooks.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center min-h-[300px] text-center">
-                            <BookOpen className="w-16 h-16 mb-4 text-gray-400" />
-                            <h3 className="mb-2 text-lg font-semibold text-gray-900">
-                                {searchTerm ||
-                                    selectedGenre !== "All Genres" ||
-                                    selectedAuthor !== "All Authors" ||
-                                    availabilityFilter !== "All"
-                                    ? `No results for "${searchTerm}"`
-                                    : "No books found"}
-                            </h3>
-                            <p className="text-gray-500">
-                                {searchTerm ||
-                                    selectedGenre !== "All Genres" ||
-                                    selectedAuthor !== "All Authors" ||
-                                    availabilityFilter !== "All"
-                                    ? "Try adjusting your search or filters"
-                                    : "Add your first book to get started"}
-                            </p>
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                            {books.map((book) => (
-                                <Book key={book.id} book={book} />
-                            ))}
-                        </div>
-                    )}
+                    {
+                        books.length === 0
+                            ?
+                            (
+                                <div className="flex flex-col items-center justify-center min-h-[300px] text-center">
+                                    <BookOpen className="w-16 h-16 mb-4 text-gray-400" />
+                                    <h3 className="mb-2 text-lg font-semibold text-gray-900">
+                                        No books found
+                                    </h3>
+                                </div>
+                            )
+                            :
+                            (
+                                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                                    {books.map((book) => (
+                                        <Book key={book.id} book={book} />
+                                    ))}
+                                </div>
+                            )
+                    }
                 </div>
 
-
             </div>
+
         </>
     )
+
 }

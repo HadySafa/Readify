@@ -8,7 +8,6 @@ import NotificationsPage from './Components/Notifications'
 import ProfilePage from './Components/Profile'
 import History from './Components/History'
 import Borrow from './Components/Borrow'
-import { HeaderNavigation } from './Components/Header'
 
 function App() {
   return (
@@ -19,11 +18,11 @@ function App() {
         <Route path='/register' element={<Register />} />
         <Route path='/dashboard' element={<Dashboard />} />
         <Route path='/homepage' element={<BooksContainer />} />
-        <Route path='/notifications' element={<NotificationsPage />} />
         <Route path='/profile' element={<ProfilePage />} />
-        <Route path='/history' element={<History />} />
-        <Route path='/borrow' element={<Borrow />} />
-        <Route path='/header' element={<HeaderNavigation />} />
+        <Route path="/history/:id?" element={<History />} />
+        <Route path='/book/:id' element={<Borrow />} />
+
+        <Route path='/notifications' element={<NotificationsPage />} />
       </Routes>
     </>
 

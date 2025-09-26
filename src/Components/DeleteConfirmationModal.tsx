@@ -11,7 +11,7 @@ export default function DeleteConfirmationModal({ message, onClose, onConfirm}: 
       <div className="w-full max-w-sm p-6 bg-white border rounded-lg shadow-lg">
         <h4 className="mb-2 text-lg font-semibold">Delete Confirmation</h4>
         <p className="mb-4 text-sm text-gray-600">
-          {message}? This action cannot be undone.
+          {message} This action cannot be undone.
         </p>
         <div className="flex justify-end gap-2">
           <button

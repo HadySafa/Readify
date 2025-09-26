@@ -10,19 +10,25 @@ import type { RootState, AppDispatch } from "../../Store";
 import { fetchStats } from "../../Store/Slices/StatsSlice";
 
 
-export default function Stats( ){
+export default function Stats() {
 
     const { stats } = useSelector((state: RootState) => state.stats);
 
     const dispatch = useDispatch<AppDispatch>();
 
-    useEffect ( () => {
+    useEffect(() => {
         dispatch(fetchStats());
-    },[])
-    
-    return(
+    }, [])
+    useEffect(() => {
+        const interval = setInterval(() => { dispatch(fetchStats()) }, 5000); // get stats every 5 seconds
+        return () => clearInterval(interval);
+    }, []);
+
+
+
+    return (
         <div className="grid grid-cols-1 gap-4 mb-6 md:grid-cols-6">
-            
+
             {/* Total Books */}
             <div className="p-4 bg-white shadow-md rounded-2xl">
                 <div className="flex items-center justify-between pb-2">
@@ -44,7 +50,7 @@ export default function Stats( ){
             {/* Borrowed */}
             <div className="p-4 bg-white shadow-md rounded-2xl">
                 <div className="flex items-center justify-between pb-2">
-                    <h3 className="text-sm font-medium text-gray-700">Borrowed</h3>
+                    <h3 className="text-sm font-medium text-gray-700">Unavailable</h3>
                     <XCircle className="h-5 text-red-700 w -5" />
                 </div>
                 <div className="mt-2 text-2xl font-bold text-red-700">{stats.borrowedBooks}</div>
@@ -76,7 +82,7 @@ export default function Stats( ){
                 </div>
                 <div className="mt-2 text-2xl font-bold">{stats.totalUsers}</div>
             </div>
-            
+
         </div>
     )
 }

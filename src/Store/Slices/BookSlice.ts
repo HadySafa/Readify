@@ -33,7 +33,7 @@ const booksSlice = createSlice({
     name: "books",
     initialState,
     reducers: {
-        clearGenreState: (state) => {
+        clearBookState: (state) => {
             state.loading = false;
             state.error = null;
         }
@@ -62,5 +62,5 @@ const booksSlice = createSlice({
 );
 
 export default booksSlice.reducer;
-export const { clearGenreState } = booksSlice.actions;
+export const { clearBookState } = booksSlice.actions;
 

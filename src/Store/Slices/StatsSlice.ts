@@ -2,6 +2,9 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from "axios";
 import type { Author } from '../../Models/Author';
 import type { Stats } from '../../Models/Stats';
+import type { RootState } from '..';
+
+
 
 interface InitialStateType {
     stats: Stats,
@@ -20,18 +23,31 @@ const initialState: InitialStateType = {
     error: null
 }
 
-export const fetchStats = createAsyncThunk<Stats, void, { rejectValue: string }>("stats/fetch", async (_, { rejectWithValue }) => {
-    try {
-        const res = await axios.get("http://localhost:5067/api/stats");
-        return res.data.stats[0];
-    } catch (error: unknown) {
-        if (axios.isAxiosError(error)) {
-            if (error.response) return rejectWithValue(error.response.data?.message);
-            if (error.request) return rejectWithValue("Unable to reach the server. Please try again.");
+
+export const fetchStats = createAsyncThunk<Stats, void, { rejectValue: string, state: RootState }>(
+    "stats/fetch",
+    async (_, { rejectWithValue, getState }) => {
+        try {
+            const state = getState();
+            const token = state.auth.token;
+
+            const res = await axios.get("http://localhost:5067/api/stats", {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            return res.data.stats[0];
+        } catch (error: unknown) {
+            if (axios.isAxiosError(error)) {
+                if (error.response) return rejectWithValue(error.response.data?.message);
+                if (error.request) return rejectWithValue("Unable to reach the server. Please try again.");
+            }
+            return rejectWithValue("Unexpected error occurred.");
         }
-        return rejectWithValue("Unexpected error occurred.");
     }
-});
+);
+
 
 
 const slice = createSlice({

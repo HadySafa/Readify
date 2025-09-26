@@ -3,5 +3,5 @@ export interface User {
   full_name: string;
   username: string;
   role: "Admin" | "User";
-  phone_numer: number;
+  phone_number: number;
 }

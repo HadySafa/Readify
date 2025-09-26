@@ -1,5 +1,14 @@
 import { useState } from "react"
-import { Home, Bell, User, LogOut, LayoutDashboard, ArrowLeft, Menu, X, Library } from "lucide-react"
+
+// Icons
+import { Home, Bell, User, LogOut, LayoutDashboard, ArrowLeft, Menu, X } from "lucide-react"
+
+// Redux
+import { useDispatch } from "react-redux";
+import { clearToken } from "../Store/Slices/AuthenticationSlice";
+
+// Router
+import { useNavigate } from "react-router-dom";
 
 interface HeaderNavigationProps {
   role?: "user" | "admin"
@@ -10,24 +19,26 @@ interface HeaderNavigationProps {
 
 export function HeaderNavigation({ role = "user", showBack = false, backLink = "", active = "" }: HeaderNavigationProps) {
 
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  // Mobile menu
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  function toggleMobileMenu () { setIsMobileMenuOpen(!isMobileMenuOpen) }
 
-  function handleLogout() {
-
-  }
-
+  // Navigation items
   const navigationItems = [
     { name: "Home", href: "/homepage", icon: Home },
     { name: "Notifications", href: "/notifications", icon: Bell },
-    { name: "Profile", href: "profile", icon: User }
+    { name: "Profile", href: "/profile", icon: User }
   ]
+  if (role === "admin") { navigationItems.splice(0, 0, { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard }) }
 
-  if (role === "admin") {
-    navigationItems.splice(0, 0, { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard })
+  // Logout
+  function handleLogout() {
+    dispatch(clearToken())
+    navigate("/")
   }
-
-  const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen)
-
 
   return (
 
@@ -41,10 +52,10 @@ export function HeaderNavigation({ role = "user", showBack = false, backLink = "
           <div className="flex items-center">
             {showBack ?
               (
-                <a href={backLink} className="flex items-center gap-1 px-2 py-1 transition-colors rounded hover:bg-gray-200">
+                <button onClick={() => {navigate(backLink)}} className="flex items-center gap-1 px-2 py-1 transition-colors rounded hover:bg-gray-200">
                   <ArrowLeft className="w-4 h-4" />
                   <span className="sr-only">Go back</span>
-                </a>
+                </button>
               )
               :
               <h2 className="flex items-center gap-2 text-2xl font-extrabold tracking-tight text-transparent md:text-3xl bg-clip-text bg-gradient-to-r from-green-700 to-green-900 drop-shadow-sm">
@@ -61,11 +72,11 @@ export function HeaderNavigation({ role = "user", showBack = false, backLink = "
               navigationItems.map((item) => {
                 const Icon = item.icon
                 return (
-                  <a key={item.name} href={item.href}
-                    className={`flex items-center gap-2 px-3 py-1 transition-colors rounded hover:bg-gray-200 ${active === item.name && "text-green-700"}`}>
+                  <button key={item.name} onClick={() => {navigate(item.href)}}
+                    className={`flex items-center gap-2 px-3 py-1 transition-colors rounded hover:bg-green-100 ${active === item.name && "text-green-700"}`}>
                     <Icon className="w-4 h-4" />
                     <span>{item.name}</span>
-                  </a>
+                  </button>
                 )
               })
             }
@@ -81,7 +92,7 @@ export function HeaderNavigation({ role = "user", showBack = false, backLink = "
           {/* Menu Button */}
           <button
             type="button"
-            className="p-2 transition-colors rounded md:hidden hover:bg-gray-200"
+            className="p-2 transition-colors rounded md:hidden hover:bg-green-100"
             onClick={toggleMobileMenu}
             aria-label="Toggle navigation menu"
           >
@@ -102,21 +113,18 @@ export function HeaderNavigation({ role = "user", showBack = false, backLink = "
                 {navigationItems.map((item) => {
                   const Icon = item.icon
                   return (
-                    <a
-                      key={item.name}
-                      href={item.href}
-                      className={`flex items-center gap-3 px-3 py-2 transition-colors rounded hover:bg-gray-200 ${active === item.name && "text-green-700"}`}
-                      onClick={() => setIsMobileMenuOpen(false)}
+                    <button key={item.name} onClick={() => { navigate(item.href); setIsMobileMenuOpen(false)}}
+                      className={`flex items-center gap-3 px-3 py-2 transition-colors rounded hover:bg-green-100 ${active === item.name && "text-green-700"}`}
                     >
                       <Icon className="w-4 h-4" />
                       <span>{item.name}</span>
-                    </a>
+                    </button>
                   )
                 })}
 
                 {/* Logout Button */}
                 <button
-                  className="flex items-center gap-3 px-3 py-2 text-white transition-colors bg-red-700 rounded hover:bg-red-600"
+                  className="flex items-center gap-3 px-3 py-2 text-white transition-colors bg-red-600 rounded hover:bg-red-700"
                   onClick={() => { setIsMobileMenuOpen(false); handleLogout(); }}
                 >
                   <LogOut className="w-4 h-4" />
