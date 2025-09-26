@@ -45,3 +45,18 @@ It is built with **React & TypeScript** on the frontend and **ASP.NET Core** on 
 - Real-time notification updates.  
 
 ---
+
+
+## Development Approach
+
+The development of this project was carried out in **7 key phases**:
+
+1. **Defining Project Features** – identified core and extra functionalities.  
+2. **Database Design** – structured entities, relationships, and constraints.  
+3. **Project Setup**  
+   - **Frontend:** React, TypeScript, TailwindCSS, Axios  
+   - **Backend:** ASP.NET Core, Dapper, MySQL ( For Database)
+4. **Authentication & State Management** – implemented token-based authentication using **JWTs** and configured global state with **Redux**.  
+5. **Feature Development** – built admin functionalities first, followed by user features.  
+6. **Testing** – validated APIs and UI with **Postman**, **Swagger**, and **browser developer tools**.  
+7. **Documentation** – prepared detailed project documentation.
