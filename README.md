@@ -44,8 +44,6 @@ It is built with **React & TypeScript** on the frontend and **ASP.NET Core** on 
 - Book reservation system.  
 - Real-time notification updates.  
 
----
-
 
 ## Development Approach
 
@@ -65,5 +63,15 @@ I’ve shared a detailed breakdown of these phases in a series of LinkedIn posts
 You can start reading from **[Phase 1 here](https://www.linkedin.com/posts/hadyabdallahsafa_fullstackdevelopment-webdevelopment-reactjs-activity-7371797383292284928-HTZk?utm_source=share&utm_medium=member_desktop&rcm=ACoAADy9VLYB3eC6Id_JgPlGzjgt4k6V8fuMstY)**.  
 
 
----
+## Frontend Architecture & Design
+
+- **Responsive Design** – the application is fully responsive and works seamlessly on all screen sizes.  
+- **User-Friendly UI** – designed with clarity and an intuitive information architecture.  
+- **Component-Based Structure** – React components are modular, reusable, and easy to maintain.  
+- **TypeScript** – used throughout the frontend for type safety, scalability, and improved developer experience.  
+- **Global State Management** – implemented using **Redux**.  
+- **API Calls**  
+  - Component-specific API calls are handled within their respective components.  
+  - Shared or cross-component API calls are centralized in Redux slices.  
+
 
