@@ -1,4 +1,4 @@
-Readify
+# Readify
 
 **Readify** is a fully functional, responsive, and user-friendly e-library web application.  
 It is built with **React & TypeScript** on the frontend and **ASP.NET Core** on the backend, connected through REST APIs.
@@ -25,7 +25,7 @@ It is built with **React & TypeScript** on the frontend and **ASP.NET Core** on 
 - Track currently borrowed books.  
 - View borrowing history.  
 
----
+
 
 ### Extra Features
 
@@ -36,7 +36,7 @@ It is built with **React & TypeScript** on the frontend and **ASP.NET Core** on 
   - Overdue books.  
   - Newly added books.  
 
----
+
 
 ### Future Features
 
@@ -73,5 +73,20 @@ You can start reading from **[Phase 1 here](https://www.linkedin.com/posts/hadya
 - **API Calls**  
   - Component-specific API calls are handled within their respective components.  
   - Shared or cross-component API calls are centralized in Redux slices.  
+
+## Note
+
+The backend part of this project is in a separate repository. Make sure to [check it out here](https://github.com/HadySafa/Readify-Backend) for the complete application.
+
+## Screenshots
+
+![](./src/assets/1.png)
+![](./src/assets/2.png)
+![](./src/assets/3.png)
+![](./src/assets/4.png)
+![](./src/assets/5.png)
+![](./src/assets/6.png)
+
+
 
 
